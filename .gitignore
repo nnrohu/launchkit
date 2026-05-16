@@ -46,7 +46,14 @@ src/db/migrations/
 # react email
 /.react-email/
 
-graphify-out/manifest.json    # mtime-based, breaks after git clone
-graphify-out/cost.json        # local only
-graphify-out/cache/        # optional: commit for speed, skip to keep repo small
-test-account.json        # local only
+# mtime-based, breaks after git clone
+graphify-out/manifest.json
+
+# local only
+graphify-out/cost.json
+
+# optional: commit for speed, skip to keep repo small
+graphify-out/cache/
+
+# local only
+test-account.json
