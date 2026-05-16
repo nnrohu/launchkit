@@ -34,7 +34,6 @@ A production-ready SaaS boilerplate built with the latest technologies. Ship you
 ![Pricing](./screenshots/pricing.png)
 ![Login](./screenshots/login.png)
 ![Dashboard](./screenshots/dashboard.png)
-![Billing](./screenshots/billing.png)
 ![Settings](./screenshots/settings.png)
 ![Organization](./screenshots/organization.png)
 

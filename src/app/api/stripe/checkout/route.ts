@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { stripe, PLANS, type PlanType } from "@/lib/stripe";
 import { db } from "@/db";
-import { subscriptions } from "@/db/schema";
+import { subscription } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function POST(request: Request) {
@@ -26,8 +26,8 @@ export async function POST(request: Request) {
     // Get or create Stripe customer
     const [existingSub] = await db
       .select()
-      .from(subscriptions)
-      .where(eq(subscriptions.userId, session.user.id))
+      .from(subscription)
+      .where(eq(subscription.userId, session.user.id))
       .limit(1);
 
     let customerId = existingSub?.stripeCustomerId;
@@ -43,11 +43,11 @@ export async function POST(request: Request) {
       // Upsert subscription record
       if (existingSub) {
         await db
-          .update(subscriptions)
+          .update(subscription)
           .set({ stripeCustomerId: customerId })
-          .where(eq(subscriptions.userId, session.user.id));
+          .where(eq(subscription.userId, session.user.id));
       } else {
-        await db.insert(subscriptions).values({
+        await db.insert(subscription).values({
           id: crypto.randomUUID(),
           userId: session.user.id,
           stripeCustomerId: customerId,

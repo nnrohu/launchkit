@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/db";
-import { subscriptions } from "@/db/schema";
+import { subscription } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function GET(request: Request) {
@@ -16,8 +16,8 @@ export async function GET(request: Request) {
 
     const [sub] = await db
       .select()
-      .from(subscriptions)
-      .where(eq(subscriptions.userId, session.user.id))
+      .from(subscription)
+      .where(eq(subscription.userId, session.user.id))
       .limit(1);
 
     return NextResponse.json(

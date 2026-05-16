@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { db } from "@/db";
-import { subscriptions } from "@/db/schema";
+import { subscription } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import type Stripe from "stripe";
 
@@ -32,13 +32,13 @@ export async function POST(request: Request) {
         if (userId && plan) {
           const [existing] = await db
             .select()
-            .from(subscriptions)
-            .where(eq(subscriptions.userId, userId))
+            .from(subscription)
+            .where(eq(subscription.userId, userId))
             .limit(1);
 
           if (existing) {
             await db
-              .update(subscriptions)
+              .update(subscription)
               .set({
                 stripeSubscriptionId: session.subscription as string,
                 stripeCustomerId: session.customer as string,
@@ -46,9 +46,9 @@ export async function POST(request: Request) {
                 status: "active",
                 updatedAt: new Date(),
               })
-              .where(eq(subscriptions.userId, userId));
+              .where(eq(subscription.userId, userId));
           } else {
-            await db.insert(subscriptions).values({
+            await db.insert(subscription).values({
               id: crypto.randomUUID(),
               userId,
               stripeCustomerId: session.customer as string,
@@ -70,20 +70,20 @@ export async function POST(request: Request) {
           const subAny = sub as any;
           const [existing] = await db
             .select()
-            .from(subscriptions)
-            .where(eq(subscriptions.stripeSubscriptionId, subscriptionId))
+            .from(subscription)
+            .where(eq(subscription.stripeSubscriptionId, subscriptionId))
             .limit(1);
 
           if (existing) {
             await db
-              .update(subscriptions)
+              .update(subscription)
               .set({
                 status: "active",
                 currentPeriodStart: new Date(subAny.current_period_start * 1000),
                 currentPeriodEnd: new Date(subAny.current_period_end * 1000),
                 updatedAt: new Date(),
               })
-              .where(eq(subscriptions.stripeSubscriptionId, subscriptionId));
+              .where(eq(subscription.stripeSubscriptionId, subscriptionId));
           }
         }
         break;
@@ -93,13 +93,13 @@ export async function POST(request: Request) {
         const sub = event.data.object as any;
         const [existing] = await db
           .select()
-          .from(subscriptions)
-          .where(eq(subscriptions.stripeSubscriptionId, sub.id))
+          .from(subscription)
+          .where(eq(subscription.stripeSubscriptionId, sub.id))
           .limit(1);
 
         if (existing) {
           await db
-            .update(subscriptions)
+            .update(subscription)
             .set({
               status: sub.status === "active" ? "active" : "inactive",
               cancelAtPeriodEnd: sub.cancel_at_period_end,
@@ -107,7 +107,7 @@ export async function POST(request: Request) {
               currentPeriodEnd: new Date(sub.current_period_end * 1000),
               updatedAt: new Date(),
             })
-            .where(eq(subscriptions.stripeSubscriptionId, sub.id));
+            .where(eq(subscription.stripeSubscriptionId, sub.id));
         }
         break;
       }
@@ -116,13 +116,13 @@ export async function POST(request: Request) {
         const sub = event.data.object as Stripe.Subscription;
         const [existing] = await db
           .select()
-          .from(subscriptions)
-          .where(eq(subscriptions.stripeSubscriptionId, sub.id))
+          .from(subscription)
+          .where(eq(subscription.stripeSubscriptionId, sub.id))
           .limit(1);
 
         if (existing) {
           await db
-            .update(subscriptions)
+            .update(subscription)
             .set({
               plan: "free",
               status: "canceled",
@@ -130,7 +130,7 @@ export async function POST(request: Request) {
               cancelAtPeriodEnd: false,
               updatedAt: new Date(),
             })
-            .where(eq(subscriptions.stripeSubscriptionId, sub.id));
+            .where(eq(subscription.stripeSubscriptionId, sub.id));
         }
         break;
       }
